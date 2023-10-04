@@ -1,0 +1,28 @@
+diff --git a/Configurations/10-main.conf b/Configurations/10-main.conf
+index aedfa370ca..3fe3e87225 100644
+--- a/Configurations/10-main.conf
++++ b/Configurations/10-main.conf
+@@ -1414,6 +1414,7 @@ my %targets = (
+         lib_defines      => add("L_ENDIAN"),
+         dso_cflags       => "/Zi /Fddso.pdb",
+         bin_cflags       => "/Zi /Fdapp.pdb",
++        shlib_variant => "-owl",
+         # def_flag made to empty string so a .def file gets generated
+         shared_defflag   => '',
+         shared_ldflag    => "/dll",
+@@ -1577,6 +1578,7 @@ my %targets = (
+         dso_scheme       => "win32",
+         shared_target    => "mingw-shared",
+         shared_cppflags  => add("_WINDLL"),
++        shlib_variant => "-owl",
+         shared_ldflag    => "-static-libgcc",
+ 
+         perl_platform    => 'mingw',
+@@ -1657,6 +1659,7 @@ my %targets = (
+         thread_scheme    => "pthread",
+         dso_scheme       => "dlfcn",
+         shared_target    => "cygwin-shared",
++        shlib_variant    => "-owl",
+         shared_cppflags  => "-D_WINDLL",
+ 
+         perl_platform    => 'Cygwin',
