@@ -184,6 +184,10 @@ if("version3" IN_LIST FEATURES)
     set(OPTIONS "${OPTIONS} --enable-version3")
 endif()
 
+if("owlsuffix" IN_LIST FEATURES)
+    set(OPTIONS "${OPTIONS} --build-suffix=-owl ")
+endif()
+
 if("ffmpeg" IN_LIST FEATURES)
     set(OPTIONS "${OPTIONS} --enable-ffmpeg")
 else()
@@ -706,6 +710,10 @@ file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include" "${CURRENT_PACKAGES_
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
     file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/bin" "${CURRENT_PACKAGES_DIR}/debug/bin")
 endif()
+set(OWL_FILE_SUFFIX "")
+if("owlsuffix" IN_LIST FEATURES)
+    set(OWL_FILE_SUFFIX "-owl")
+endif()
 
 vcpkg_copy_pdbs()
 
@@ -716,7 +724,7 @@ if (VCPKG_TARGET_IS_WINDOWS)
     endif()
     foreach(_debug IN LISTS _dirs)
         foreach(PKGCONFIG_MODULE IN LISTS FFMPEG_PKGCONFIG_MODULES)
-            set(PKGCONFIG_FILE "${CURRENT_PACKAGES_DIR}${_debug}lib/pkgconfig/${PKGCONFIG_MODULE}.pc")
+            set(PKGCONFIG_FILE "${CURRENT_PACKAGES_DIR}${_debug}lib/pkgconfig/${PKGCONFIG_MODULE}${OWL_FILE_SUFFIX}.pc")
             # remove redundant cygwin style -libpath entries
             execute_process(
                 COMMAND "${MSYS_ROOT}/usr/bin/cygpath.exe" -u "${CURRENT_INSTALLED_DIR}"
@@ -760,9 +768,15 @@ endif()
 
 vcpkg_fixup_pkgconfig()
 
-# Handle dependencies
+# generate module names with suffix if applicatble
 
-x_vcpkg_pkgconfig_get_modules(PREFIX FFMPEG_PKGCONFIG MODULES ${FFMPEG_PKGCONFIG_MODULES} LIBS)
+set(FFMPEG_PKGCONFIG_MODULES_WITH_SUFFIX "")
+foreach(_moduleval IN LISTS FFMPEG_PKGCONFIG_MODULES)
+    set(FFMPEG_PKGCONFIG_MODULES_WITH_SUFFIX "${_moduleval}${OWL_FILE_SUFFIX}")
+endforeach()
+
+# Handle dependencies
+x_vcpkg_pkgconfig_get_modules(PREFIX FFMPEG_PKGCONFIG MODULES ${FFMPEG_PKGCONFIG_MODULES_WITH_SUFFIX} LIBS)
 
 function(append_dependencies_from_libs out)
     cmake_parse_arguments(PARSE_ARGV 1 "arg" "" "LIBS" "")
@@ -773,14 +787,14 @@ function(append_dependencies_from_libs out)
     list(TRANSFORM contents REPLACE "^-Wl,-framework," "-l")
     list(FILTER contents EXCLUDE REGEX "^-Wl,.+")
     list(TRANSFORM contents REPLACE "^-l" "")
-    list(FILTER contents EXCLUDE REGEX "^avutil$")
-    list(FILTER contents EXCLUDE REGEX "^avcodec$")
-    list(FILTER contents EXCLUDE REGEX "^avdevice$")
-    list(FILTER contents EXCLUDE REGEX "^avfilter$")
-    list(FILTER contents EXCLUDE REGEX "^avformat$")
+    list(FILTER contents EXCLUDE REGEX "^avutil${OWL_FILE_SUFFIX}$")
+    list(FILTER contents EXCLUDE REGEX "^avcodec${OWL_FILE_SUFFIX}$")
+    list(FILTER contents EXCLUDE REGEX "^avdevice${OWL_FILE_SUFFIX}$")
+    list(FILTER contents EXCLUDE REGEX "^avfilter${OWL_FILE_SUFFIX}$")
+    list(FILTER contents EXCLUDE REGEX "^avformat${OWL_FILE_SUFFIX}$")
     list(FILTER contents EXCLUDE REGEX "^postproc$")
-    list(FILTER contents EXCLUDE REGEX "^swresample$")
-    list(FILTER contents EXCLUDE REGEX "^swscale$")
+    list(FILTER contents EXCLUDE REGEX "^swresample${OWL_FILE_SUFFIX}$")
+    list(FILTER contents EXCLUDE REGEX "^swscale${OWL_FILE_SUFFIX}$")
     if(VCPKG_TARGET_IS_WINDOWS)
         list(TRANSFORM contents TOLOWER)
     endif()
